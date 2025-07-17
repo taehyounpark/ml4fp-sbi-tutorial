@@ -2,6 +2,17 @@
 
 This repository houses the simulation-based inference tutorial to be presented at ML4FP 2025.
 
+## Prerequisites
+
+- For the system:
+    - Apptainer
+    - A capable NVIDIA GPU
+
+- For the student:
+    - Maximum likelihood estimation
+    - Array operations (`torch.tensor`)
+    - Basic ML programming skills (`lightning`)
+
 ## Setup
 
 First, build & launch the container by
