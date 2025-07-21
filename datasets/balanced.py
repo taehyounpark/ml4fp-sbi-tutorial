@@ -14,7 +14,7 @@ from physics.analysis import zz4l, zz2l2v
 
 class BalancedDataModule(L.LightningDataModule):
 
-    def __init__(self, numerator_events: str = '', denominator_events: str = '', numerator_reweight : tuple = None, denominator_reweight : tuple = None, analysis = 'h4l', features = ['cth_star', 'cth_1', 'cth_2', 'phi_1', 'phi', 'Z1_mass', 'Z2_mass', '4l_mass', '4l_rapidity'], sample_size = 10000, batch_size: int = 32, random_state: int=None, data_dir : str = './'):
+    def __init__(self, numerator_events: str = '', denominator_events: str = '', numerator_reweight : tuple = None, denominator_reweight : tuple = None, features = ['cth_star', 'cth_1', 'cth_2', 'phi_1', 'phi', 'Z1_mass', 'Z2_mass', '4l_mass', '4l_rapidity'], batch_size: int = 32, random_state: int=None, data_dir : str = './'):
         super().__init__()
 
         self.features = features
@@ -24,8 +24,6 @@ class BalancedDataModule(L.LightningDataModule):
         self.numerator_rwt = numerator_reweight
         self.denominator_rwt = denominator_reweight
 
-        self.sample_size = sample_size
-
         self.batch_size = batch_size
         self.random_state = random_state
 
@@ -34,16 +32,20 @@ class BalancedDataModule(L.LightningDataModule):
 
     def prepare_data(self):
 
-        events_numerator = mcfm.from_csv(cross_section=None, file_path=self.numerator_file, kinematics=self.features)
-        events_denominator = mcfm.from_csv(cross_section=None, file_path=self.denominator_file, kinematics=self.features)
+        if isinstance(self.numerator_file, mcfm.Process):
+            events_numerator = self.numerator_file
+        else:
+            events_numerator = mcfm.from_csv(cross_section=None, file_path=self.numerator_file, kinematics=self.features)
+
+        if isinstance(self.denominator_file, mcfm.Process):
+            events_denominator = self.denominator_file
+        else:
+            events_denominator = mcfm.from_csv(cross_section=None, file_path=self.denominator_file, kinematics=self.features)
 
         if self.numerator_rwt is not None:
             events_numerator = events_numerator.reweight(denominator=self.numerator_rwt[0], numerator=self.numerator_rwt[1])
         if self.denominator_rwt is not None:
             events_denominator = events_denominator.reweight(denominator=self.denominator_rwt[0], numerator=self.denominator_rwt[1])
-
-        events_numerator = events_numerator.sample(self.sample_size, random_state=self.random_state)
-        events_denominator = events_denominator.sample(self.sample_size, random_state=self.random_state)
 
         train_size, val_size, test_size = 6, 2, 2
         events_numerator_train, events_numerator_val, events_numerator_test = events_numerator.split(train_size=train_size, val_size=val_size, test_size=test_size)

@@ -211,6 +211,9 @@ class Process():
 			)
 
 	def sample(self, n, random_state=None):
+		"""
+  		Select a random portion of the events which (hopefully) corresponds to a lower-statistics sampling of the same hypothesis.
+    	"""
 
 		# if sampling more events than available, simply take all shuffled events
 		if n >= len(self.weights):
@@ -228,7 +231,18 @@ class Process():
 			sampled_weights.reset_index(drop=True)
 		)
 
+	def resample(self, random_state = None):
+		"""
+  		For wifi ensembles.
+		"""
+		# TODO: IMPLEMENT ME
+		# for now, just return itself
+		return self
+
 	def unweight(self, n, random_state=None):
+		"""
+  		Draw an integer-valued number of occurences of the events by resampling with replacement.
+    	"""
 		unweighted_events_indices = self.weights.sample(n=n, replace=True, weights=self.weights, random_state=random_state).index
 
 		return Process(
